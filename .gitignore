@@ -1,0 +1,8 @@
+# uretilen ciktilar disinda tutulanlar
+shots/
+__pycache__/
+*.pyc
+.DS_Store
+
+# macOS
+.DS_Store
