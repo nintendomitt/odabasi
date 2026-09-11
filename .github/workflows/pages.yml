@@ -1,0 +1,46 @@
+name: GitHub Pages
+
+# main dalina her push'ta site/ klasorunu GitHub Pages'e yayinlar.
+# Pages ayarlarinda kaynak "GitHub Actions" secili olmali.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Onizleme yayini arama motorlarina kapali olmali.
+      # Bu adim yalnizca Pages ciktisini degistirir, depodaki dosyalara dokunmaz.
+      # Site gercek alan adinda yayina alindiginda bu adimi silin.
+      - name: Onizlemeyi dizine kapat
+        run: |
+          printf 'User-agent: *\nDisallow: /\n' > site/robots.txt
+          find site -name '*.html' -print0 | xargs -0 sed -i \
+            's|<meta name="robots" content="index, follow[^"]*">|<meta name="robots" content="noindex, nofollow">|'
+          echo "robots.txt ve $(find site -name '*.html' | wc -l) sayfa dizine kapatildi"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -241,29 +241,44 @@ Harici dosya bağımlılığı yok (logolar dosyanın içine gömülü), yani te
 gönderebilir veya müşteriye WhatsApp'tan atabilirsiniz. Yayına alınacak sürüm bu değil — `site/`
 klasörü yayına gider; `preview.html` sadece göstermek için.
 
-### GitHub
+### GitHub ve yayın
 
-Proje bir git deposu olarak hazırlandı ve ilk commit atıldı. Özel (private) repoya göndermek için:
-
-```bash
-# 1) GitHub'da bos bir private repo acin (README/gitignore EKLEMEYIN)
-#    github.com/new  ->  Repository name: odabasi-website  ->  Private  ->  Create
-
-# 2) Bu klasorde:
-git remote add origin https://github.com/<kullanici-adiniz>/odabasi-website.git
-git branch -M main
-git push -u origin main
-```
-
-Sonraki değişikliklerde:
+Proje `github.com/nintendomitt/odabasi` deposunda. Değişiklik sonrası akış:
 
 ```bash
 python3 build.py && python3 make_preview.py
 git add -A && git commit -m "guncelleme: <ne degisti>" && git push
 ```
 
-`.gitignore` ekran görüntülerini ve Python önbelleğini dışarıda bırakıyor; `site/`, `preview.html`,
-üretici scriptler ve logolar depoda.
+`.gitignore` ekran görüntülerini, Python önbelleğini ve `.DS_Store` dosyalarını dışarıda bırakıyor;
+`site/`, `preview.html`, üretici scriptler ve logolar depoda.
+
+#### GitHub Pages
+
+`.github/workflows/pages.yml` iş akışı, `main` dalına her push'ta `site/` klasörünü GitHub Pages'e
+yayınlıyor. Çalışması için iki ayar gerekiyor:
+
+1. **Depo public olmalı.** GitHub'ın ücretsiz planında Pages yalnızca public depolarda çalışıyor;
+   private depodan yayın Pro planı gerektiriyor.
+   Settings → General → en altta Danger Zone → Change repository visibility → Public
+2. **Pages kaynağı "GitHub Actions" olmalı.**
+   Settings → Pages → Build and deployment → Source → **GitHub Actions**
+
+Sonrasında adres: `https://nintendomitt.github.io/odabasi/`
+
+**Önizleme arama motorlarına kapalı.** İş akışındaki "Önizlemeyi dizine kapat" adımı, yayınlanan
+kopyada `robots.txt` dosyasını `Disallow: /` yapıyor ve tüm sayfalara `noindex` ekliyor. Bunun sebebi:
+sitedeki canonical adresler gerçek alan adını gösteriyor, ayrıca içerikte hâlâ yer tutucu telefon ve
+adres var. Bu adım olmasaydı Google taslak kopyayı dizine alabilir ve gerçek site yayına girdiğinde
+çift içerik sorunu çıkardı. **Depodaki dosyalara dokunmuyor**, sadece Pages çıktısını değiştiriyor.
+
+Site gerçek alan adında yayına alındığında o adımı `pages.yml` içinden silin.
+
+#### Alternatif: Cloudflare Pages veya Netlify
+
+Depoyu public yapmak istemezseniz her ikisi de ücretsiz planda private depodan yayın yapıyor ve
+her push'ta otomatik güncelleniyor. Gerçek alan adını bağlamak da aynı panelden yapılıyor —
+yayına alma aşamasında bu yolu değerlendirmek mantıklı olur.
 
 ---
 
