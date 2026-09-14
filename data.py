@@ -10,24 +10,25 @@ SITE = {
     "legal": "Odabaşı Dayanıklı Tüketim",
     "domain": "https://www.odabasidayanikli.com",  # TODO: gerçek alan adı
     "tagline": "İzmir, Aydın ve Manisa'da beyaz eşya ve dayanıklı tüketim ürünleri",
-    "phone_display": "0232 000 00 00",              # TODO
-    "phone_tel": "+902320000000",                   # TODO
+    "phone_display": "0232 425 42 43",              # LG Shop Cankaya - merkez numara
+    "phone_tel": "+902324254243",
     "whatsapp": "905000000000",                     # TODO
     "email": "info@odabasidayanikli.com",           # TODO
     # TODO: gerçek mağaza adresi. address_line sitede görünen tam adres satırıdır;
     # street/district/postal ise schema.org PostalAddress icin kullanilir.
     # Bos birakilan alanlar schema'ya yazilmaz. Google Business Profile'daki yazimla birebir ayni olmali.
-    "address_line": "Çankaya ve Eşrefpaşa, İzmir",  # kısa özet; şube detayı BRANCHES içinde
-    "street": "",                                   # TODO: merkez şubenin açık adresi
+    # Ana isletme kaydi merkez subeyi (LG Shop Cankaya) gosterir; ikinci sube BRANCHES icinde.
+    "address_line": "Gazi Bulvarı No: 86/A, İsmet Kaptan, Konak / İzmir",
+    "street": "Gazi Bulvarı No: 86/A",
     "district": "Konak",
     "city": "İzmir",
-    "postal": "",                                   # TODO: posta kodu
-    "lat": "38.4237",                               # TODO: mağazanın Google Haritalar koordinatı
-    "lng": "27.1428",                               # TODO: haritadaki mağaza işareti bu değerden gelir
+    "postal": "35210",
+    "lat": "38.4242982",
+    "lng": "27.1382816",
     "founded": "2005",                              # TODO
-    "hours": "Pazartesi - Cumartesi 09:00 - 19:00",
+    "hours": "Pazartesi - Cumartesi 09:00 - 18:30",
     "hours_schema": [
-        ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "09:00", "19:00"
+        ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "09:00", "18:30"
     ],
     "instagram": "https://www.instagram.com/",      # TODO
     "facebook": "https://www.facebook.com/",        # TODO
@@ -64,19 +65,23 @@ BRANCHES = [
     {
         "slug": "lg-shop-cankaya",
         "name": "LG Shop Çankaya",
+        # Google Business Profile'daki kayitli isim. Schema'ya alternateName olarak girer.
+        "gmb_name": "LG Brandshop Odabaşı - Çankaya",
         "brand": "lg",                    # marka sayfasına bağlanır
-        "area": "Çankaya",
+        "area": "İsmet Kaptan Mah.",
         "district": "Konak",
         "city": "İzmir",
-        # DOGRULA: asagidaki adres, LG bayi listelerinden derlendi. Musteriden teyit alin.
-        "street": "Gazi Bulvarı No: 69",
-        "postal": "35280",
-        "phone_display": "0232 425 42 43",   # DOGRULA
-        "phone_tel": "+902324254243",        # DOGRULA
-        "lat": "38.42427",                   # DOGRULA
-        "lng": "27.13828",                   # DOGRULA
-        "maps": "",                       # istege bagli: Google Haritalar kisa baglantisi
-        "hours": "Pazartesi - Cumartesi 09:00 - 19:00",
+        "street": "Gazi Bulvarı No: 86/A",
+        "building": "Osman Şahin İş Merkezi 4",
+        "postal": "35210",
+        "phone_display": "0232 425 42 43",
+        "phone_tel": "+902324254243",
+        "lat": "38.4242982",
+        "lng": "27.1382816",
+        "maps": "https://maps.google.com/?cid=6908724871638253831",
+        "hours": "Pazartesi - Cumartesi 08:30 - 18:30",
+        "hours_schema": [["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                         "08:30", "18:30"],
         "note": "LG ürün gamının tamamının sergilendiği marka mağazamız. "
                 "Buzdolabı, çamaşır ve bulaşık makinesi, klima, televizyon ve ankastre "
                 "gruplarını yerinde görüp karşılaştırabilirsiniz.",
@@ -84,18 +89,22 @@ BRANCHES = [
     {
         "slug": "ugur-shop-esrefpasa",
         "name": "Uğur Shop Eşrefpaşa",
+        "gmb_name": "Odabaşı - Uğur Ev Aletleri Eşrefpaşa Bayii",
         "brand": "ugur",
-        "area": "Eşrefpaşa",
+        "area": "Atilla Mah.",
         "district": "Konak",
         "city": "İzmir",
-        "street": "",                     # TODO: "Eşrefpaşa Caddesi No: 00" gibi
-        "postal": "",                     # TODO
-        "phone_display": "",              # TODO
-        "phone_tel": "",                  # TODO
-        "lat": "",                        # TODO: harita pini bu degerden gelir
-        "lng": "",                        # TODO
-        "maps": "",                       # istege bagli
+        "street": "Eşrefpaşa Caddesi No: 362 D:A",
+        "building": "",
+        "postal": "35270",
+        "phone_display": "0536 353 89 94",
+        "phone_tel": "+905363538994",
+        "lat": "38.4052792",
+        "lng": "27.1284995",
+        "maps": "https://maps.google.com/?cid=621354996486976066",
         "hours": "Pazartesi - Cumartesi 09:00 - 19:00",
+        "hours_schema": [["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                         "09:00", "19:00"],
         "note": "Uğur marka mağazamız. Ev tipi derin dondurucuların yanı sıra market, kafe ve "
                 "restoranlara yönelik ticari soğutma ürünlerini burada inceleyebilir, "
                 "işletmeniz için yerleşim önerisi alabilirsiniz.",

@@ -32,23 +32,40 @@ yeterli — tüm sayfalar, schema kayıtları, sitemap ve llms.txt yeniden üret
 
 | Alan | Ne yazılmalı |
 |---|---|
-| `street` | Açık adres — `Gazi Bulvarı No: 69` gibi |
+| `street` | Açık adres — `Gazi Bulvarı No: 86/A` gibi |
 | `postal` | Posta kodu |
 | `phone_display` / `phone_tel` | Şubeye ait ayrı numara varsa. Boş bırakılırsa genel numara gösterilir |
 | `lat` / `lng` | Enlem / boylam. **Haritadaki pin buradan gelir.** Boş bırakılırsa harita yerine "adres eklenince görünecek" kutusu çıkar |
 | `hours` | Şubeye özel çalışma saati. Boş bırakılırsa `SITE["hours"]` kullanılır |
-| `maps` | İsteğe bağlı Google Haritalar kısa bağlantısı. Boşsa koordinattan otomatik üretilir |
+| `hours_schema` | `[[günler], "açılış", "kapanış"]` — schema.org için |
+| `gmb_name` | Google Business Profile'daki kayıtlı ad. Schema'ya `alternateName` olarak girer |
+| `maps` | Google Haritalar bağlantısı (`maps.google.com/?cid=…`). Boşsa koordinattan otomatik üretilir |
 
 **Koordinat nasıl bulunur:** Google Haritalar'da mağazaya sağ tıklayın, en üstte çıkan
-`38.42427, 27.13828` biçimindeki sayı çiftine tıklayın (panoya kopyalanır). İlk sayı `lat`,
+`38.4242982, 27.1382816` biçimindeki sayı çiftine tıklayın (panoya kopyalanır). İlk sayı `lat`,
 ikincisi `lng`.
 
-> ⚠️ **LG Shop Çankaya adresi doğrulanmalı.** `Gazi Bulvarı No: 69, 35280 Çankaya` adresi ve
-> `0232 425 42 43` numarası, LG bayi dizinlerinden derlendi — müşteriden teyit alınmadı.
-> `data.py` içinde `# DOGRULA` yorumuyla işaretli. Yanlışsa düzeltin.
+Her iki şubenin adresi, telefonu, koordinatı ve çalışma saati **Google Business Profile
+kayıtlarından** alındı ve `data.py` içine işlendi:
+
+| | LG Shop Çankaya | Uğur Shop Eşrefpaşa |
+|---|---|---|
+| Adres | İsmet Kaptan Mah., Gazi Bulvarı No: 86/A (Osman Şahin İş Mrk. 4), 35210 Konak | Atilla Mah., Eşrefpaşa Cad. No: 362 D:A, 35270 Konak |
+| Telefon | 0232 425 42 43 | 0536 353 89 94 |
+| Koordinat | 38.4242982, 27.1382816 | 38.4052792, 27.1284995 |
+| Saatler | Pzt-Cmt 08:30 - 18:30 | Pzt-Cmt 09:00 - 19:00 |
+| Google kaydı | LG Brandshop Odabaşı - Çankaya | Odabaşı - Uğur Ev Aletleri Eşrefpaşa Bayii |
+
+> ⚠️ **NAP tutarlılığı — karar verilmesi gereken konu.** Sitede kullandığımız kısa adlar
+> ("LG Shop Çankaya", "Uğur Shop Eşrefpaşa") Google Business Profile'daki kayıtlı adlarla
+> aynı değil. Schema'ya ikisi de `alternateName` olarak yazılıyor ama yerel SEO'da en güçlü
+> sinyal **birebir aynı yazım**. İki seçenek: (a) Google kayıtlarını sitedeki adlara
+> çevirin, (b) `data.py` içindeki `name` alanlarını Google'daki adlara çevirin. Hangisi
+> olursa olsun ikisinin aynı olması, farklı kalmasından iyidir.
 >
-> ⚠️ **Uğur Shop Eşrefpaşa adresi eksik.** Açık adres, telefon ve koordinat girilene kadar o
-> mağazanın haritası boş kutu olarak görünür; sayfa bozulmaz.
+> Şubelerin çalışma saatleri farklı olduğu için üst bardaki genel saat, ikisinin de açık
+> olduğu aralık (09:00 - 18:30) olarak yazıldı. Mağaza kartlarında her şubenin kendi saati
+> görünüyor.
 
 Şubeler `magazalar.html` sayfasında (adres + telefon + saat + gömülü Google Haritalar + yol tarifi),
 ana sayfadaki "Mağazalarımız" bölümünde, footer'da, iletişim ve hakkımızda sayfalarında görünüyor;

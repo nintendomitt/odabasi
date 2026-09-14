@@ -325,9 +325,9 @@ def branch_cards(depth, compact=False):
 # ---------------------------------------------------------------------------
 def branch_addr_full(b):
     """Cok satirli acik adres."""
-    l1 = b.get("street") or ""
-    l2 = " ".join(x for x in [b.get("postal"), b.get("area")] if x)
-    l3 = "%s / %s" % (b["district"], b["city"])
+    l1 = ", ".join(x for x in [b.get("area"), b.get("street")] if x)
+    l2 = b.get("building") or ""
+    l3 = " ".join(x for x in [b.get("postal"), "%s / %s" % (b["district"], b["city"])] if x)
     return [x for x in (l1, l2, l3) if x]
 
 
@@ -861,6 +861,7 @@ def branch_ld():
             addr["streetAddress"] = b["street"]
         if b.get("postal"):
             addr["postalCode"] = b["postal"]
+        hs = b.get("hours_schema") or SITE["hours_schema"]
         node = {
             "@context": "https://schema.org", "@type": ["Store", "HomeGoodsStore"],
             "@id": url("magazalar.html#%s" % b["slug"]),
@@ -874,11 +875,11 @@ def branch_ld():
             "parentOrganization": {"@id": url("#store")},
             "openingHoursSpecification": [{
                 "@type": "OpeningHoursSpecification",
-                "dayOfWeek": SITE["hours_schema"][0],
-                "opens": SITE["hours_schema"][1],
-                "closes": SITE["hours_schema"][2],
+                "dayOfWeek": hs[0], "opens": hs[1], "closes": hs[2],
             }],
         }
+        if b.get("gmb_name") and b["gmb_name"] != b["name"]:
+            node["alternateName"] = [b["name"], b["gmb_name"]]
         geo = branch_geo(b)
         if geo:
             node["geo"] = {"@type": "GeoCoordinates", "latitude": geo[0], "longitude": geo[1]}
@@ -1814,8 +1815,9 @@ def build_stores():
          "Alabilirsiniz, ancak gerek yok. İzmir, Aydın ve Manisa'da teslimat ve standart montaj ücretsizdir; "
          "ürünü kata çıkarma dahil yerine kurup devreye alıyoruz."),
         ("Mağazalarınız hafta sonu açık mı?",
-         "Mağazalarımız pazartesiden cumartesiye 09:00 - 19:00 arasında hizmet veriyor. Pazar günleri kapalıyız; "
-         "teklif formuna bıraktığınız talebe pazartesi sabahı dönüş yapıyoruz."),
+         "Cumartesi günleri açığız, pazar günleri kapalıyız. LG Shop Çankaya 08:30 - 18:30, "
+         "Uğur Shop Eşrefpaşa 09:00 - 19:00 saatleri arasında hizmet veriyor. Pazar günü teklif "
+         "formuna bıraktığınız talebe pazartesi sabahı dönüş yapıyoruz."),
     ]
     body = """
 %s
@@ -1864,8 +1866,9 @@ def build_stores():
 """ % (
         crumbs(0, cb), icon("store", "ico sm"),
         answer_box("Odabaşı Dayanıklı Tüketim'in İzmir Konak'ta iki mağazası bulunmaktadır: "
-                   "LG Shop Çankaya ve Uğur Shop Eşrefpaşa. Her iki mağaza da pazartesi - cumartesi "
-                   "09:00 - 19:00 saatleri arasında açıktır. Teslimat ve montaj hizmeti İzmir, Aydın ve "
+                   "Gazi Bulvarı No: 86/A adresindeki LG Shop Çankaya (pazartesi - cumartesi "
+                   "08:30 - 18:30) ve Eşrefpaşa Caddesi No: 362 adresindeki Uğur Shop Eşrefpaşa "
+                   "(pazartesi - cumartesi 09:00 - 19:00). Teslimat ve montaj hizmeti İzmir, Aydın ve "
                    "Manisa'yı kapsar.",
                    "Odabaşı mağazaları nerede?"),
         stores_section(0, "h2"),
