@@ -37,10 +37,14 @@ img,svg{max-width:100%}
 
 /* ---- topbar / header ---- */
 .topbar{background:var(--dark); color:#D5D9E0; font-size:.8rem}
-.topbar-in{display:flex; gap:22px; padding:9px 20px; align-items:center}
-.topbar-in span{display:flex; align-items:center; gap:6px; white-space:nowrap}
+.topbar-in{display:flex; gap:28px; padding:10px 20px; align-items:center}
 .topbar-in .ico{color:var(--brand)}
-.topbar-r{margin-left:auto; color:#9AA3AF}
+.tb-item{display:flex; align-items:center; gap:9px; white-space:nowrap}
+.tb-item>.ico{width:22px;height:22px}
+.tb-item b{display:block; color:#fff; font-size:.76rem; font-weight:700; line-height:1.35}
+.tb-item span{display:block; line-height:1.35}
+.tb-item a{color:#D5D9E0}
+.tb-item a:hover{color:var(--brand); text-decoration:none}
 .hd{position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid var(--line)}
 .hd-in{display:flex; align-items:center; gap:22px; padding-block:13px}
 .logo{display:block; flex:none; line-height:0}
@@ -96,6 +100,8 @@ img,svg{max-width:100%}
 .hero-points .ico{color:var(--brand)}
 .hero-art{position:relative}
 .hero-art .art{width:100%;height:auto;display:block}
+.page-art{max-width:660px;margin:26px auto 0}
+.page-art .art{width:100%;height:auto;display:block}
 
 .page-hero{background:linear-gradient(180deg,#FFFFFF,#F7F9FC);border-bottom:1px solid var(--line);padding-block:52px 46px;position:relative}
 .page-hero::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:linear-gradient(90deg,var(--brand),rgba(230,0,52,0) 62%)}
@@ -390,6 +396,93 @@ tbody tr:last-child td{border-bottom:0}
 .ft-col a:hover{color:var(--brand)}
 .ft-bot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:44px;padding-block:20px;border-top:1px solid rgba(255,255,255,.09);font-size:.8rem;color:#6B7280}
 
+/* ---- pazaryeri magazalari ---- */
+.mp-top,.mp-nav,.mp-ft,.mp-big{display:inline-flex;align-items:center;font-weight:700;white-space:nowrap}
+.mp-top{font-size:.78rem;padding:3px 9px;border-radius:6px;color:#fff;line-height:1.5}
+.mp-top.mp-hepsiburada{background:#FF6000}
+.mp-top.mp-n11{background:#F2385A}
+.mp-top:hover{text-decoration:none;color:#fff;filter:brightness(1.08)}
+.tb-shops{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tb-shops-l{color:#9AA3AF;font-size:.78rem}
+.nav-mp{display:none}
+.mp-ft{font-size:.82rem;padding:6px 12px;border-radius:8px;color:#fff;margin-right:8px;margin-top:8px}
+.mp-ft.mp-hepsiburada{background:#FF6000}
+.mp-ft.mp-n11{background:#F2385A}
+.mp-ft:hover{text-decoration:none;color:#fff;filter:brightness(1.1)}
+.ft-shops{margin-top:22px}
+.ft-shops b{display:block;color:#fff;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
+.mp-big{font-size:1rem;padding:14px 26px;border-radius:12px;color:#fff;box-shadow:var(--shadow)}
+.mp-big.mp-hepsiburada{background:#FF6000}
+.mp-big.mp-n11{background:#F2385A}
+.mp-big:hover{text-decoration:none;color:#fff;transform:translateY(-2px);filter:brightness(1.06)}
+.sec-shops{background:var(--dark);color:#fff}
+.sec-shops h2{color:#fff}
+.sec-shops p{color:#AEB5C0}
+.sec-shops .eyebrow{color:var(--brand)}
+.shops-in{display:grid;grid-template-columns:1.4fr .9fr;gap:32px;align-items:center}
+.shops-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+
+/* ---- yuzen butonlar ---- */
+.fabs{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.fab{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:999px;color:#fff;font-weight:600;font-size:.9rem;box-shadow:0 6px 22px rgba(16,18,22,.28)}
+.fab:hover{text-decoration:none;color:#fff;filter:brightness(1.08)}
+.fab .ico{width:18px;height:18px}
+.fab-wa{background:var(--ok)}
+.fab-hepsiburada{background:#FF6000;padding:10px 16px;font-size:.84rem}
+.fab-n11{background:#F2385A;padding:10px 16px;font-size:.84rem}
+
+/* ---- fotografli kategori kartlari ---- */
+.sec-head-c{max-width:66ch;margin-inline:auto;text-align:center}
+.sec-head-c h2{padding-top:20px}
+.sec-head-c h2::before{left:50%;transform:translateX(-50%)}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.pcard{position:relative;display:block;border-radius:var(--r);overflow:hidden;background:var(--ink);min-height:250px;box-shadow:var(--shadow)}
+.pcard:hover{text-decoration:none;box-shadow:var(--shadow-lg)}
+.pcard-img{position:absolute;inset:0;display:block}
+.pcard-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.pcard:hover .pcard-img img{transform:scale(1.05)}
+.pcard::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,12,15,.62) 0%,rgba(11,12,15,.16) 42%,rgba(11,12,15,.16) 58%,rgba(11,12,15,.78) 100%)}
+.pcard-noimg{background:linear-gradient(160deg,var(--ink-2),var(--dark))}
+.pcard-in{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:space-between;height:100%;min-height:250px;padding:22px}
+.pcard-t{display:block}
+.pcard-in strong{display:block;color:#fff;font-family:Manrope,Inter,sans-serif;font-size:1.22rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.pcard-sub{display:block;color:rgba(255,255,255,.72);font-size:.8rem;margin-top:4px}
+.pcard-go{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;background:rgba(255,255,255,.94);color:var(--ink);font-size:.82rem;font-weight:700;padding:8px 14px;border-radius:8px;transition:background .2s,color .2s}
+.pcard:hover .pcard-go{background:var(--brand);color:#fff}
+
+/* ---- hero fotografi ---- */
+.hero-photo{position:relative;z-index:2;border-radius:18px;overflow:hidden;box-shadow:var(--shadow-lg);aspect-ratio:16/10;background:var(--soft)}
+.hero-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-line{position:absolute;border-radius:3px;background:var(--brand);box-shadow:0 0 14px rgba(230,0,52,.7);z-index:1}
+.hero-line-1{height:3px;width:130px;top:-14px;right:38px}
+.hero-line-2{width:3px;height:92px;top:26px;right:-14px}
+.hero-line-3{height:3px;width:190px;bottom:-14px;left:30px}
+.hero-badge{position:absolute;z-index:3;left:-18px;bottom:22px;display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-lg);max-width:280px}
+.hero-badge .ico{color:var(--brand)}
+.hero-badge span{font-size:.76rem;color:var(--muted);line-height:1.45}
+.hero-badge b{display:block;color:var(--ink);font-size:.88rem}
+
+/* ---- magaza kartlari ---- */
+.stores{display:flex;flex-direction:column;gap:26px}
+.store{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.store-head{display:flex;align-items:center;gap:16px;padding:22px 24px;border-bottom:1px solid var(--line-2);border-top:3px solid var(--brand)}
+.store-head h2,.store-head h3{margin:0;font-size:1.2rem}
+.store-head p{margin:4px 0 0;font-size:.86rem;color:var(--muted)}
+.store-body{display:grid;grid-template-columns:1fr 1.15fr;gap:0}
+.store-info{padding:24px;display:flex;flex-direction:column;gap:18px}
+.store-row{display:flex;flex-direction:column;gap:4px}
+.store-lbl{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.store-lbl .ico{color:var(--brand)}
+.store-addr{font-style:normal;display:flex;flex-direction:column;font-size:.95rem;color:var(--ink-2)}
+.store-row a{color:var(--ink-2);font-size:.95rem;font-weight:600}
+.store-row a:hover{color:var(--brand)}
+.store-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto;padding-top:4px}
+.store-actions .btn{font-size:.86rem}
+.store-map{position:relative;min-height:330px;background:var(--soft);border-left:1px solid var(--line-2)}
+.store-map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.store-map-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted-2);text-align:center;padding:24px}
+.store-map-empty p{font-size:.85rem;margin:0;max-width:30ch}
+
 /* ---- whatsapp float ---- */
 .wa{position:fixed;right:18px;bottom:18px;z-index:80;display:inline-flex;align-items:center;gap:8px;background:var(--ok);color:#fff;padding:12px 18px;border-radius:999px;font-weight:600;font-size:.9rem;box-shadow:0 6px 22px rgba(31,122,77,.35)}
 .wa:hover{text-decoration:none;color:#fff;background:#186339}
@@ -417,7 +510,18 @@ tbody tr:last-child td{border-bottom:0}
   .mega{position:static;width:auto!important;box-shadow:none;border:0;border-radius:0;padding:0 0 8px 12px;grid-template-columns:1fr!important}
   .nav-link{justify-content:space-between;width:100%;padding:12px}
   .topbar-in{font-size:.74rem;gap:14px;justify-content:center}
-  .topbar-in .topbar-mid,.topbar-in .topbar-r{display:none}
+  .topbar-in .tb-mid,.topbar-in .tb-shops{display:none}
+  .tb-item>.ico{width:18px;height:18px}
+  .nav-mp{display:flex;gap:8px;margin-top:16px;padding:16px 12px 0;border-top:1px solid var(--line)}
+  .nav-mp .mp-nav{font-size:.82rem;padding:8px 14px;border-radius:8px;color:#fff}
+  .nav-mp .mp-hepsiburada{background:#FF6000}
+  .nav-mp .mp-n11{background:#F2385A}
+  .store-body{grid-template-columns:1fr}
+  .store-map{min-height:280px;border-left:0;border-top:1px solid var(--line-2)}
+  .pgrid{grid-template-columns:repeat(2,1fr)}
+  .shops-in{grid-template-columns:1fr;gap:22px}
+  .shops-btns{justify-content:flex-start}
+  .hero-badge{left:12px}
   .form-split{grid-template-columns:1fr;gap:32px}
   .branches{grid-template-columns:1fr}
   .areas{grid-template-columns:repeat(2,1fr)}
@@ -444,6 +548,17 @@ tbody tr:last-child td{border-bottom:0}
   .areas{grid-template-columns:1fr}
   .wa span{display:none}
   .wa{padding:14px;border-radius:50%}
+  .pgrid{grid-template-columns:1fr}
+  .pcard,.pcard-in{min-height:210px}
+  .fabs{right:14px;bottom:14px;gap:8px}
+  .fab .fab-t{display:none}
+  .fab{padding:13px;border-radius:50%}
+  .fab-hepsiburada,.fab-n11{padding:11px}
+  .fab-hepsiburada .ico,.fab-n11 .ico{width:16px;height:16px}
+  .hero-badge{position:static;max-width:none;margin-top:16px}
+  .hero-line-2{display:none}
+  .store-actions .btn{width:100%;justify-content:center}
+  .mp-big{width:100%;justify-content:center}
   .badge{display:block;margin:12px 0 0;top:0;width:fit-content}
   .logo img{height:32px}
 }

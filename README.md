@@ -32,14 +32,32 @@ yeterli — tüm sayfalar, schema kayıtları, sitemap ve llms.txt yeniden üret
 
 | Alan | Ne yazılmalı |
 |---|---|
-| `street` | Açık adres — `Şair Eşref Bulvarı No: 00` gibi |
+| `street` | Açık adres — `Gazi Bulvarı No: 69` gibi |
 | `postal` | Posta kodu |
 | `phone_display` / `phone_tel` | Şubeye ait ayrı numara varsa. Boş bırakılırsa genel numara gösterilir |
-| `maps` | Google Haritalar bağlantısı. Boş bırakılırsa "Haritada aç" düğmesi çıkmaz |
+| `lat` / `lng` | Enlem / boylam. **Haritadaki pin buradan gelir.** Boş bırakılırsa harita yerine "adres eklenince görünecek" kutusu çıkar |
+| `hours` | Şubeye özel çalışma saati. Boş bırakılırsa `SITE["hours"]` kullanılır |
+| `maps` | İsteğe bağlı Google Haritalar kısa bağlantısı. Boşsa koordinattan otomatik üretilir |
 
-Şubeler footer'da, iletişim sayfasında, hakkımızda sayfasında ve ana sayfadaki teklif bloğunda
-görünüyor; ayrıca her biri için ayrı bir `Store` schema kaydı üretiliyor (ana işletmeye
-`parentOrganization` ile bağlı). "Bize sorun" bölümünde de iki mağaza adıyla anılıyor.
+**Koordinat nasıl bulunur:** Google Haritalar'da mağazaya sağ tıklayın, en üstte çıkan
+`38.42427, 27.13828` biçimindeki sayı çiftine tıklayın (panoya kopyalanır). İlk sayı `lat`,
+ikincisi `lng`.
+
+> ⚠️ **LG Shop Çankaya adresi doğrulanmalı.** `Gazi Bulvarı No: 69, 35280 Çankaya` adresi ve
+> `0232 425 42 43` numarası, LG bayi dizinlerinden derlendi — müşteriden teyit alınmadı.
+> `data.py` içinde `# DOGRULA` yorumuyla işaretli. Yanlışsa düzeltin.
+>
+> ⚠️ **Uğur Shop Eşrefpaşa adresi eksik.** Açık adres, telefon ve koordinat girilene kadar o
+> mağazanın haritası boş kutu olarak görünür; sayfa bozulmaz.
+
+Şubeler `magazalar.html` sayfasında (adres + telefon + saat + gömülü Google Haritalar + yol tarifi),
+ana sayfadaki "Mağazalarımız" bölümünde, footer'da, iletişim ve hakkımızda sayfalarında görünüyor;
+ayrıca her biri için ayrı bir `Store` schema kaydı üretiliyor (ana işletmeye `parentOrganization`
+ile bağlı, koordinat varsa `geo` ve `hasMap` alanlarıyla). "Bize sorun" bölümünde de iki mağaza
+adıyla anılıyor.
+
+Haritalar **API anahtarı gerektirmeyen** Google Maps embed bağlantısıyla gömülüyor
+(`maps?q=<lat>,<lng>&output=embed`), `loading="lazy"` ile. Aylık kota veya faturalandırma yok.
 
 Şube sayısı değişirse listeye eleman ekleyip çıkarmanız yeterli — site geneli otomatik güncellenir.
 Yeni bir şubenin `brand` alanına marka slug'ı yazarsanız (örn. `"grundig"`), o markanın logosu
@@ -98,6 +116,52 @@ Site, paylaştığınız logoya göre kurgulandı.
 Logo dosyaları `assets/logo.png` (açık zemin için, siyah + kırmızı) ve `assets/logo-white.png`
 (koyu zemin ve footer için, beyaz + kırmızı). İkisi de orijinal PNG'den üretildi. Vektör (SVG veya AI)
 dosyanız varsa `assets_src/` içine koyup `build.py` içindeki uzantıyı değiştirmeniz daha keskin sonuç verir.
+
+### Fotoğraflar
+
+Sitedeki fotoğraflar **Unsplash**'ten alınmış stok görsellerdir (Unsplash License: ticari kullanım
+serbest, atıf zorunlu değil). Kaynak listesi ve indirme/kırpma kodu `prep_photos.py` içinde.
+
+| Nerede | Dosya | Ölçü |
+|---|---|---|
+| Hero (sağ kolon) | `assets/foto/hero.webp` | 1600×900 |
+| Ürün grubu kartları | `assets/foto/<kategori-slug>.webp` | 900×600 |
+| Yedek mağaza görseli | `assets/foto/magaza.webp` | 1600×900 |
+
+Hepsi WebP, toplam ~570 KB. Kategori kartları `loading="lazy"`, hero `fetchpriority="high"`.
+
+**Gerçek fotoğraflarla değiştirmek** (önerilir — mağaza ve ürün fotoğrafı satışa doğrudan etki eder):
+
+```bash
+# 900x600 (kart) veya 1600x900 (hero) oranında kırpıp WebP kaydedin:
+assets_src/foto/buzdolabi.webp     # kategori slug'ı ile aynı ad
+assets_src/foto/hero.webp
+python3 build.py
+```
+
+`build.py` fotoğrafı bulamazsa kart otomatik olarak koyu zeminli metin kartına döner — sayfa bozulmaz.
+Marka logolarının aksine bu görsellerde **rakip marka logosu görünmemesine** dikkat edildi; yeni
+fotoğraf eklerken aynı kurala uyun.
+
+### Pazaryeri mağazaları
+
+`data.py` içindeki `MARKETPLACES` listesi Hepsiburada ve n11 mağazalarını tanımlıyor. Linkler
+dört yerde çıkıyor:
+
+1. Üst bar (sağ üst, masaüstü)
+2. Mobil menünün altında
+3. Footer — "Online mağazalarımız"
+4. Sağ alttaki yüzen buton grubunda (WhatsApp ile birlikte)
+
+Ayrıca ana sayfada ve mağazalar sayfasında koyu zeminli bir tanıtım bandı var ve her iki link
+`Store` schema'sının `sameAs` alanına giriyor — bu, Google'ın mağazalarınızı aynı işletmeyle
+ilişkilendirmesini sağlar.
+
+Pazaryeri **logoları kullanılmadı**; marka adları kendi kurumsal renklerinde metin olarak yazılıyor.
+Logo kullanımı bu platformların marka kılavuzlarına tabidir, izinsiz kullanmak risklidir.
+
+Yeni bir pazaryeri eklemek için listeye `slug`, `name`, `short`, `url`, `color` alanlarıyla bir kayıt
+ekleyin, ardından `build.py` içindeki CSS'te `.mp-top.mp-<slug>` vb. dört satıra rengi tanımlayın.
 
 ### Marka duvarı — gri görünüm
 
@@ -198,19 +262,23 @@ site/
 ├── servis-ve-destek.html
 ├── sikca-sorulan-sorular.html
 ├── iletisim.html
+├── magazalar.html
 ├── 404.html
 ├── kategori/      11 ürün grubu sayfası
 ├── marka/         10 marka sayfası
 ├── bolge/         13 lokasyon sayfası
 ├── blog/          index + 6 rehber yazısı
 ├── assets/        style.css, site.js, favicon.svg
+│   ├── markalar/  marka logoları (PNG)
+│   └── foto/      stok fotoğraflar (WebP)
 ├── robots.txt
 ├── sitemap.xml
 ├── llms.txt
 └── .htaccess
 ```
 
-Not: `preview.html`, `build.py`, `data.py`, `make_preview.py`, `assets_src/` ve `README.md`
+Not: `preview.html`, `build.py`, `data.py`, `make_preview.py`, `prep_logos.py`, `prep_photos.py`,
+`photos_raw/`, `assets_src/` ve `README.md`
 **yayına gitmez** — bunlar kaynak dosyalar. Sunucuya sadece `site/` klasörünün içi yüklenir.
 
 **cPanel / paylaşımlı hosting:** `site/` klasörünün *içindekileri* `public_html` altına yükleyin.
@@ -436,9 +504,12 @@ sayfalarına, her kategori sayfası ilgili markalara ve lokasyon hub'larına lin
 ## 10. Yeniden üretim
 
 ```bash
-python3 build.py
+python3 build.py            # site/ klasörünü sıfırdan üretir
+python3 prep_photos.py      # eksik stok fotoğrafları indirir (varsa atlar)
+python3 prep_logos.py hoover=~/Desktop/hoover.png   # yeni marka logosu işler
+python3 make_preview.py     # tüm siteyi tek dosyaya gömer
 ```
 
-`data.py` içeriği değiştirip komutu çalıştırdığınızda `site/` klasörü sıfırdan üretilir.
+`data.py` içeriği değiştirip `build.py` çalıştırdığınızda `site/` klasörü sıfırdan üretilir.
 Yeni bir kategori, marka, lokasyon veya blog yazısı eklemek için ilgili listeye bir sözlük eklemeniz
 yeterli — sayfa, menü, footer, iç linkler, sitemap ve llms.txt otomatik güncellenir.

@@ -4,5 +4,5 @@ __pycache__/
 *.pyc
 .DS_Store
 
-# macOS
-.DS_Store
+# stok fotograf ham dosyalari (prep_photos.py yeniden indirir)
+photos_raw/

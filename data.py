@@ -31,8 +31,27 @@ SITE = {
     ],
     "instagram": "https://www.instagram.com/",      # TODO
     "facebook": "https://www.facebook.com/",        # TODO
-    "updated": "2026-09-10",
+    "updated": "2026-09-14",
 }
+
+# Pazaryeri magazalari. Ust bar, footer, yuzen butonlar ve schema sameAs icinde kullanilir.
+# Sirasi sitede gorunen sirayi belirler. Bos birakilan kalem hicbir yerde gorunmez.
+MARKETPLACES = [
+    {
+        "slug": "hepsiburada",
+        "name": "Hepsiburada",
+        "short": "Hepsiburada'da",
+        "url": "https://www.hepsiburada.com/magaza/fixkirmizibeyaz",
+        "color": "#FF6000",
+    },
+    {
+        "slug": "n11",
+        "name": "n11",
+        "short": "n11'de",
+        "url": "https://www.n11.com/magaza/fixkirmizibeyaz",
+        "color": "#F2385A",
+    },
+]
 
 AUTHORIZED = ["LG", "Uğur", "Altus"]
 
@@ -49,11 +68,15 @@ BRANCHES = [
         "area": "Çankaya",
         "district": "Konak",
         "city": "İzmir",
-        "street": "",                     # TODO: "Şair Eşref Bulvarı No: 00" gibi
-        "postal": "",                     # TODO
-        "phone_display": "",              # TODO: şubeye ait numara varsa
-        "phone_tel": "",                  # TODO
-        "maps": "",                       # TODO: Google Haritalar bağlantısı
+        # DOGRULA: asagidaki adres, LG bayi listelerinden derlendi. Musteriden teyit alin.
+        "street": "Gazi Bulvarı No: 69",
+        "postal": "35280",
+        "phone_display": "0232 425 42 43",   # DOGRULA
+        "phone_tel": "+902324254243",        # DOGRULA
+        "lat": "38.42427",                   # DOGRULA
+        "lng": "27.13828",                   # DOGRULA
+        "maps": "",                       # istege bagli: Google Haritalar kisa baglantisi
+        "hours": "Pazartesi - Cumartesi 09:00 - 19:00",
         "note": "LG ürün gamının tamamının sergilendiği marka mağazamız. "
                 "Buzdolabı, çamaşır ve bulaşık makinesi, klima, televizyon ve ankastre "
                 "gruplarını yerinde görüp karşılaştırabilirsiniz.",
@@ -69,7 +92,10 @@ BRANCHES = [
         "postal": "",                     # TODO
         "phone_display": "",              # TODO
         "phone_tel": "",                  # TODO
-        "maps": "",                       # TODO
+        "lat": "",                        # TODO: harita pini bu degerden gelir
+        "lng": "",                        # TODO
+        "maps": "",                       # istege bagli
+        "hours": "Pazartesi - Cumartesi 09:00 - 19:00",
         "note": "Uğur marka mağazamız. Ev tipi derin dondurucuların yanı sıra market, kafe ve "
                 "restoranlara yönelik ticari soğutma ürünlerini burada inceleyebilir, "
                 "işletmeniz için yerleşim önerisi alabilirsiniz.",

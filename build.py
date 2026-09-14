@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Odabasi Dayanikli Tuketim - statik site uretici."""
 import os, re, shutil, json, html
-from data import SITE, BRANDS, CATEGORIES, LOCATIONS, POSTS, GENERAL_FAQS, BRANCHES
+from urllib.parse import quote
+from data import (SITE, BRANDS, CATEGORIES, LOCATIONS, POSTS, GENERAL_FAQS,
+                  BRANCHES, MARKETPLACES)
 import mapdata
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "site")
@@ -33,6 +35,11 @@ ICONS = {
     "chat": '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.8-.8L3 21l1.9-5a8.3 8.3 0 0 1-.9-3.8 8.4 8.4 0 0 1 8.5-8.2A8.4 8.4 0 0 1 21 11.5z"/>',
     "arrow": '<path d="M5 12h14"/><path d="M13 5l7 7-7 7"/>',
     "card": '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/>',
+    "cart": '<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.7 12.1a1.6 1.6 0 0 0 1.6 1.3h8.4a1.6 1.6 0 0 0 1.6-1.3L21 7H6"/>',
+    "clock": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    "mail": '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2.5 6.5L12 13l9.5-6.5"/>',
+    "store": '<path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11h16V9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M9 20v-6h6v6"/>',
+    "route": '<circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M15.5 5H9a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H8.5"/>',
 }
 
 
@@ -153,18 +160,22 @@ def nav(depth, active=""):
     <button class="nav-link nav-toggle%s" aria-expanded="false">Bölgeler %s</button>
     <div class="mega mega-locs">%s</div>
   </div>
+  <a class="nav-link%s" href="%smagazalar.html">Mağazalar</a>
   <a class="nav-link%s" href="%sservis-ve-destek.html">Servis</a>
   <a class="nav-link%s" href="%sblog/index.html">Blog</a>
   <a class="nav-link%s" href="%shakkimizda.html">Hakkımızda</a>
   <a class="nav-link%s" href="%siletisim.html">İletişim</a>
+  <span class="nav-mp">%s</span>
 </nav>""" % (
         " is-active" if active == "kategori" else "", chevron(), cat_links,
         " is-active" if active == "marka" else "", chevron(), brand_links,
         " is-active" if active == "bolge" else "", chevron(), loc_links,
+        " is-active" if active == "magazalar" else "", r,
         " is-active" if active == "servis" else "", r,
         " is-active" if active == "blog" else "", r,
         " is-active" if active == "hakkimizda" else "", r,
         " is-active" if active == "iletisim" else "", r,
+        mp_links("mp-nav"),
     )
 
 
@@ -178,10 +189,10 @@ def header(depth, active=""):
 <a class="skip" href="#main">İçeriğe geç</a>
 <div class="topbar">
   <div class="wrap topbar-in">
-    <span>%s İzmir, Aydın ve Manisa'ya teslimat ve montaj</span>
-    <span class="topbar-mid">%s Ücretsiz teslimat</span>
-    <span class="topbar-mid">%s Ücretsiz montaj</span>
-    <span class="topbar-r">%s</span>
+    <span class="tb-item">%s<span><b>Çalışma Saatleri</b>%s</span></span>
+    <span class="tb-item tb-mid">%s<span><b>Bizi Arayın</b><a href="tel:%s">%s</a></span></span>
+    <span class="tb-item tb-mid">%s<span><b>Bize Yazın</b><a href="mailto:%s">%s</a></span></span>
+    <span class="tb-shops">%s%s</span>
   </div>
 </div>
 <header class="hd">
@@ -195,8 +206,10 @@ def header(depth, active=""):
     </div>
   </div>
 </header>""" % (
-        icon("truck", "ico sm"), icon("check", "ico sm"), icon("check", "ico sm"),
-        e(SITE["hours"]),
+        icon("clock", "ico sm"), e(SITE["hours"]),
+        icon("phone", "ico sm"), e(SITE["phone_tel"]), e(SITE["phone_display"]),
+        icon("mail", "ico sm"), e(SITE["email"]), e(SITE["email"]),
+        '<span class="tb-shops-l">Online mağazalarımız</span>', mp_links("mp-top"),
         logo(depth), nav(depth, active),
         e(SITE["phone_tel"]), icon("phone", "ico sm"), e(SITE["phone_display"]),
         rel(depth),
@@ -218,6 +231,65 @@ def perks_band(compact=False):
         for i, t, d in PERKS)
     return ('<section class="perks%s"><div class="wrap perks-in">%s</div></section>'
             % (" perks-compact" if compact else "", items))
+
+
+# ---------------------------------------------------------------------------
+# PAZARYERI MAGAZALARI
+# ---------------------------------------------------------------------------
+def mp_links(cls="mp-link"):
+    """Hepsiburada / n11 metin baglantilari. Marka logosu kullanilmaz."""
+    return "".join(
+        '<a class="%s mp-%s" href="%s" target="_blank" rel="noopener">%s</a>'
+        % (cls, m["slug"], e(m["url"]), e(m["name"]))
+        for m in MARKETPLACES)
+
+
+def mp_float():
+    """Sag altta WhatsApp + pazaryeri butonlari."""
+    fabs = ['<a class="fab fab-wa" href="https://wa.me/%s" target="_blank" rel="noopener" '
+            'aria-label="WhatsApp ile yazın">%s<span class="fab-t">WhatsApp</span></a>'
+            % (e(SITE["whatsapp"]), icon("chat", "ico"))]
+    for m in MARKETPLACES:
+        fabs.append('<a class="fab fab-%s" href="%s" target="_blank" rel="noopener" '
+                    'aria-label="%s mağazamız">%s<span class="fab-t">%s</span></a>'
+                    % (m["slug"], e(m["url"]), e(m["name"]),
+                       icon("cart", "ico"), e(m["short"])))
+    return '<div class="fabs">%s</div>' % "".join(fabs)
+
+
+# ---------------------------------------------------------------------------
+# FOTOGRAFLAR
+# ---------------------------------------------------------------------------
+PHOTO_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets_src", "foto")
+
+
+def has_photo(slug):
+    return os.path.exists(os.path.join(PHOTO_DIR, slug + ".webp"))
+
+
+def photo_tag(depth, slug, alt, w, h, lazy=True, cls=""):
+    """Fotograf yoksa bos doner; sayfa fotografsiz da dogru gorunur."""
+    if not has_photo(slug):
+        return ""
+    return ('<img%s src="%sassets/foto/%s.webp" alt="%s" width="%d" height="%d" '
+            'decoding="async"%s>'
+            % (' class="%s"' % cls if cls else "", rel(depth), slug, e(alt), w, h,
+               ' loading="lazy"' if lazy else ' fetchpriority="high"'))
+
+
+def photo_card(depth, c):
+    """Yilmazer'deki gibi fotograf zeminli kategori karti."""
+    img = photo_tag(depth, c["slug"], "%s ürünleri" % c["name"], 900, 600)
+    brands = ", ".join(BRAND_BY[b]["name"] for b in c["brands"][:3])
+    return ('<a class="pcard%s" href="%skategori/%s.html">'
+            '<span class="pcard-img">%s</span>'
+            '<span class="pcard-in">'
+            '<span class="pcard-t"><strong>%s</strong>'
+            '<span class="pcard-sub">%s</span></span>'
+            '<span class="pcard-go">Ürünleri İncele %s</span>'
+            '</span></a>') % (
+        "" if img else " pcard-noimg", rel(depth), c["slug"], img,
+        e(c["name"]), e(brands), icon("arrow", "ico sm"))
 
 
 def branch_line(b):
@@ -246,6 +318,115 @@ def branch_cards(depth, compact=False):
             '<span>%s</span></div></div>%s<div class="br-links">%s%s%s</div></div>'
             % (mark, e(b["name"]), e(branch_line(b)), note, tel, maps, link))
     return '<div class="branches%s">%s</div>' % (" branches-compact" if compact else "", "".join(out))
+
+
+# ---------------------------------------------------------------------------
+# MAGAZA KONUMLARI
+# ---------------------------------------------------------------------------
+def branch_addr_full(b):
+    """Cok satirli acik adres."""
+    l1 = b.get("street") or ""
+    l2 = " ".join(x for x in [b.get("postal"), b.get("area")] if x)
+    l3 = "%s / %s" % (b["district"], b["city"])
+    return [x for x in (l1, l2, l3) if x]
+
+
+def branch_geo(b):
+    """(lat, lng) varsa doner, yoksa None."""
+    if b.get("lat") and b.get("lng"):
+        return b["lat"], b["lng"]
+    return None
+
+
+def branch_query(b):
+    """Harita aramasi icin metin sorgusu."""
+    bits = [SITE["name"], b["name"]] + branch_addr_full(b)
+    return ", ".join(bits)
+
+
+def branch_embed_src(b):
+    geo = branch_geo(b)
+    if geo:
+        q = "%s,%s" % geo
+    elif b.get("street"):
+        q = branch_query(b)
+    else:
+        return ""
+    return "https://www.google.com/maps?q=%s&hl=tr&z=17&output=embed" % quote(q)
+
+
+def branch_dir_url(b):
+    geo = branch_geo(b)
+    if geo:
+        dest = "%s,%s" % geo
+    elif b.get("street"):
+        dest = branch_query(b)
+    else:
+        return ""
+    return "https://www.google.com/maps/dir/?api=1&destination=%s" % quote(dest)
+
+
+def branch_view_url(b):
+    if b.get("maps"):
+        return b["maps"]
+    geo = branch_geo(b)
+    if geo:
+        return "https://www.google.com/maps/search/?api=1&query=%s,%s" % geo
+    if b.get("street"):
+        return "https://www.google.com/maps/search/?api=1&query=%s" % quote(branch_query(b))
+    return ""
+
+
+def store_block(depth, b, heading="h2"):
+    """Yilmazer'deki magaza karti: adres / telefon / saat + gomulu harita."""
+    r = rel(depth)
+    brand = BRAND_BY.get(b["brand"])
+    mark = brand_mark(depth, brand, "bmark-sm") if brand else ""
+    addr = "".join("<span>%s</span>" % e(x) for x in branch_addr_full(b)) or \
+           "<span class=\"muted\">Açık adres yakında eklenecek.</span>"
+    tel_d = b.get("phone_display") or SITE["phone_display"]
+    tel_t = b.get("phone_tel") or SITE["phone_tel"]
+    embed = branch_embed_src(b)
+    if embed:
+        map_html = ('<div class="store-map"><iframe src="%s" title="%s konumu" '
+                    'loading="lazy" referrerpolicy="no-referrer-when-downgrade" '
+                    'allowfullscreen></iframe></div>' % (e(embed), e(b["name"])))
+    else:
+        map_html = ('<div class="store-map store-map-empty">%s'
+                    '<p>Bu mağazanın harita konumu adres bilgisi eklendiğinde görünecek.</p></div>'
+                    % icon("pin", "ico lg"))
+    dirurl = branch_dir_url(b)
+    actions = []
+    if dirurl:
+        actions.append('<a class="btn btn-primary" href="%s" target="_blank" rel="noopener">%s Yol Tarifi</a>'
+                       % (e(dirurl), icon("route", "ico sm")))
+    actions.append('<a class="btn btn-outline" href="tel:%s">%s Ara</a>' % (e(tel_t), icon("phone", "ico sm")))
+    if brand:
+        actions.append('<a class="btn btn-ghost" href="%smarka/%s.html">%s ürünleri</a>'
+                       % (r, b["brand"], e(brand["name"])))
+    return """
+<article class="store" id="%s">
+  <div class="store-head">%s<div><%s>%s</%s><p>%s</p></div></div>
+  <div class="store-body">
+    <div class="store-info">
+      <div class="store-row"><span class="store-lbl">%s Adres</span><address class="store-addr">%s</address></div>
+      <div class="store-row"><span class="store-lbl">%s Telefon</span><a href="tel:%s">%s</a></div>
+      <div class="store-row"><span class="store-lbl">%s Çalışma Saatleri</span><span>%s</span></div>
+      <div class="store-actions">%s</div>
+    </div>
+    %s
+  </div>
+</article>""" % (
+        e(b["slug"]), mark, heading, e(b["name"]), heading, e(b["note"]),
+        icon("pin", "ico sm"), addr,
+        icon("phone", "ico sm"), e(tel_t), e(tel_d),
+        icon("clock", "ico sm"), e(b.get("hours") or SITE["hours"]),
+        "".join(actions), map_html)
+
+
+def stores_section(depth, heading="h2"):
+    return '<div class="stores">%s</div>' % "".join(
+        store_block(depth, b, heading) for b in BRANCHES)
 
 
 def auth_names(last=" ve "):
@@ -302,12 +483,15 @@ def footer(depth):
       <p class="ft-desc">LG, Uğur ve Altus yetkili bayisi. İzmir, Aydın ve Manisa'da beyaz eşya, ankastre, klima ve
       ticari soğutma. Ücretsiz teslimat, ücretsiz montaj ve taksit imkanı.</p>
       <address class="ft-addr">
-        <span class="ft-br"><b>LG Shop Çankaya</b>Çankaya, Konak / İzmir</span>
-        <span class="ft-br"><b>Uğur Shop Eşrefpaşa</b>Eşrefpaşa, Konak / İzmir</span>
+        %s
         <a href="tel:%s">%s</a>
         <a href="mailto:%s">%s</a>
         <span>%s</span>
       </address>
+      <div class="ft-shops">
+        <b>Online mağazalarımız</b>
+        <div class="ft-shops-in">%s</div>
+      </div>
     </div>
     <div class="ft-col"><h3>Ürün Grupları</h3><ul>%s</ul></div>
     <div class="ft-col"><h3>Markalar</h3><ul>%s</ul></div>
@@ -316,6 +500,7 @@ def footer(depth):
       <h3>Kurumsal</h3>
       <ul>
         <li><a href="%shakkimizda.html">Hakkımızda</a></li>
+        <li><a href="%smagazalar.html">Mağazalar</a></li>
         <li><a href="%sservis-ve-destek.html">Servis ve Destek</a></li>
         <li><a href="%ssikca-sorulan-sorular.html">Sıkça Sorulan Sorular</a></li>
         <li><a href="%sblog/index.html">Blog</a></li>
@@ -328,15 +513,18 @@ def footer(depth):
     <span>Son güncelleme: %s</span>
   </div>
 </footer>
-<a class="wa" href="https://wa.me/%s" target="_blank" rel="noopener" aria-label="WhatsApp ile yazın">%s<span>WhatsApp</span></a>
+%s
 <script src="%sassets/site.js" defer></script>""" % (
         logo(depth, "white"),
+        "".join('<span class="ft-br"><b>%s</b>%s</span>' % (e(b["name"]), e(branch_line(b)))
+                for b in BRANCHES),
         e(SITE["phone_tel"]), e(SITE["phone_display"]),
         e(SITE["email"]), e(SITE["email"]), e(SITE["hours"]),
+        mp_links("mp-ft"),
         cats, brands, locs,
-        r, r, r, r, r,
+        r, r, r, r, r, r,
         "2026", e(SITE["name"]), e(SITE["updated"]),
-        e(SITE["whatsapp"]), icon("chat", "ico"), r,
+        mp_float(), r,
     )
 
 
@@ -649,9 +837,9 @@ def local_business_ld():
         }],
         "areaServed": [{"@type": "City", "name": l["name"]} for l in LOCATIONS],
         "brand": [{"@type": "Brand", "name": b["name"]} for b in BRANDS],
-        "sameAs": [SITE["instagram"], SITE["facebook"]],
-        "department": [{"@id": url("iletisim.html#%s" % b["slug"])} for b in BRANCHES],
-        "location": [{"@id": url("iletisim.html#%s" % b["slug"])} for b in BRANCHES],
+        "sameAs": [SITE["instagram"], SITE["facebook"]] + [m["url"] for m in MARKETPLACES],
+        "department": [{"@id": url("magazalar.html#%s" % b["slug"])} for b in BRANCHES],
+        "location": [{"@id": url("magazalar.html#%s" % b["slug"])} for b in BRANCHES],
         "hasOfferCatalog": {
             "@type": "OfferCatalog",
             "name": "Ürün Grupları",
@@ -675,11 +863,11 @@ def branch_ld():
             addr["postalCode"] = b["postal"]
         node = {
             "@context": "https://schema.org", "@type": ["Store", "HomeGoodsStore"],
-            "@id": url("iletisim.html#%s" % b["slug"]),
+            "@id": url("magazalar.html#%s" % b["slug"]),
             "name": "%s — %s" % (SITE["name"], b["name"]),
             "alternateName": b["name"],
             "description": b["note"],
-            "url": url("iletisim.html"),
+            "url": url("magazalar.html#%s" % b["slug"]),
             "telephone": b.get("phone_tel") or SITE["phone_tel"],
             "email": SITE["email"],
             "address": addr,
@@ -691,8 +879,12 @@ def branch_ld():
                 "closes": SITE["hours_schema"][2],
             }],
         }
-        if b.get("maps"):
-            node["hasMap"] = b["maps"]
+        geo = branch_geo(b)
+        if geo:
+            node["geo"] = {"@type": "GeoCoordinates", "latitude": geo[0], "longitude": geo[1]}
+        hasmap = branch_view_url(b)
+        if hasmap:
+            node["hasMap"] = hasmap
         out.append(node)
     return out
 
@@ -716,6 +908,7 @@ def render(path, title, desc, body, ld=None, active="", depth=None, og_type="web
     ld = ld or []
     body = body.replace("{{PERKS}}", perks_band(True)).replace("{{ASK}}", ask_first(depth))
     body = body.replace("{{BRANCHES}}", branch_cards(depth))
+    body = body.replace("{{HERO_ART}}", HERO_ART)
     body = body.replace("{{ASK_IF}}", "")
     ld_html = "".join(
         '<script type="application/ld+json">%s</script>'
@@ -776,7 +969,7 @@ def render(path, title, desc, body, ld=None, active="", depth=None, og_type="web
 # ANA SAYFA
 # ---------------------------------------------------------------------------
 def build_home():
-    cats = "".join(cat_card(0, c) for c in CATEGORIES)
+    cats = "".join(photo_card(0, c) for c in CATEGORIES)
     brands = brand_wall(0)
     posts = "".join(
         '<a class="post-card" href="blog/%s.html"><span class="post-cat">%s</span>'
@@ -805,7 +998,13 @@ def build_home():
         <li>%s Türkiye distribütör garantisi</li>
       </ul>
     </div>
-    <div class="hero-art">%s</div>
+    <div class="hero-art">
+      <div class="hero-photo">%s</div>
+      <span class="hero-line hero-line-1" aria-hidden="true"></span>
+      <span class="hero-line hero-line-2" aria-hidden="true"></span>
+      <span class="hero-line hero-line-3" aria-hidden="true"></span>
+      <div class="hero-badge">%s<span><b>İki marka mağaza</b>LG Shop Çankaya &middot; Uğur Shop Eşrefpaşa</span></div>
+    </div>
   </div>
 </section>
 %s
@@ -819,11 +1018,11 @@ def build_home():
 
 <section class="sec" id="urunler">
   <div class="wrap">
-    <div class="sec-head">
-      <h2>Ürün grupları</h2>
+    <div class="sec-head sec-head-c">
+      <h2>Ürün Gruplarımız</h2>
       <p>Ev tipi beyaz eşyadan işletmelere yönelik ticari soğutmaya kadar tüm ürün gruplarımız.</p>
     </div>
-    <div class="grid cards">%s</div>
+    <div class="pgrid">%s</div>
   </div>
 </section>
 
@@ -846,6 +1045,29 @@ def build_home():
       <div class="feat">%s<h3>Taksit imkanı</h3><p>Anlaşmalı bankaların kredi kartlarına taksit seçenekleri sunuyoruz. Güncel kampanyalar için mağazamızı arayabilirsiniz.</p></div>
       <div class="feat">%s<h3>Ticari soğutma çözümleri</h3><p>Uğur yetkili bayisi olarak market, kafe, restoran ve pastaneler için reyon dolabı, şişe soğutucu ve teşhir üniteleri sunuyoruz. Mağaza planınıza göre yerleşim önerisi hazırlıyoruz.</p></div>
     </div>
+  </div>
+</section>
+
+<section class="sec sec-soft" id="magazalar">
+  <div class="wrap">
+    <div class="sec-head sec-head-c">
+      <h2>Mağazalarımız</h2>
+      <p>İzmir Konak'ta iki marka mağazamız var. Ürünleri yerinde görmek, ölçü ve montaj danışmanlığı almak için bekleriz.</p>
+    </div>
+    %s
+    <p class="more"><a href="magazalar.html">Mağaza detayları ve haritalar %s</a></p>
+  </div>
+</section>
+
+<section class="sec sec-shops">
+  <div class="wrap shops-in">
+    <div>
+      <p class="eyebrow">%s Online Mağazalarımız</p>
+      <h2>Hepsiburada ve n11'deki mağazalarımız</h2>
+      <p>Ürünlerimizin bir bölümünü pazaryeri mağazalarımızdan da satın alabilirsiniz. Fiyat ve stok konusunda
+      emin olamadığınızda bizi arayın; mağazadan alımda teslimat ve montaj her zaman ücretsizdir.</p>
+    </div>
+    <div class="shops-btns">%s</div>
   </div>
 </section>
 
@@ -877,7 +1099,8 @@ def build_home():
 """ % (
         icon("shield", "ico sm"), e(SITE["phone_tel"]), icon("phone", "ico sm"), e(SITE["phone_display"]),
         icon("check", "ico sm"), icon("check", "ico sm"), icon("check", "ico sm"), icon("check", "ico sm"),
-        HERO_ART,
+        photo_tag(0, "hero", "Beyaz eşyalarla döşenmiş modern mutfak", 1600, 900, lazy=False),
+        icon("store", "ico lg"),
         perks_band(),
         ask_first(0),
         answer_box("Odabaşı Dayanıklı Tüketim, İzmir merkezli bir beyaz eşya ve dayanıklı tüketim mağazasıdır. "
@@ -887,6 +1110,8 @@ def build_home():
                    "Odabaşı Dayanıklı Tüketim nedir?"),
         cats, brands,
         icon("truck", "ico lg"), icon("shield", "ico lg"), icon("card", "ico lg"), icon("ticari-sogutma", "ico lg"),
+        stores_section(0, "h3"), icon("arrow", "ico sm"),
+        icon("cart", "ico sm"), mp_links("mp-big"),
         service_map(0), posts, icon("arrow", "ico sm"),
         icon("phone", "ico sm"), e(SITE["phone_tel"]), e(SITE["phone_display"]),
         icon("check", "ico sm"), e(SITE["hours"]),
@@ -1088,7 +1313,7 @@ def build_locations():
         il = l["il"]
         where = name if l["hub"] else "%s, %s" % (name, il)
         areas = "".join('<li>%s</li>' % e(a) for a in l["areas"])
-        cats = "".join(cat_card(1, c) for c in CATEGORIES)
+        cats = "".join(photo_card(1, c) for c in CATEGORIES)
         brands = brand_wall(1)
 
         answer = ("%s bölgesinde beyaz eşya, ankastre, klima ve ticari soğutma ihtiyaçlarınız için "
@@ -1324,6 +1549,7 @@ def build_static():
     <p class="lead-p">İzmir merkezli bir beyaz eşya ve dayanıklı tüketim mağazasıyız. LG, Uğur ve Altus yetkili bayisi olarak
     ev tipi beyaz eşyadan işletmelere yönelik ticari soğutmaya kadar geniş bir ürün ailesini tek noktadan sunuyoruz.
     Teslimat ve montaj ücretsiz, taksit imkanı var.</p>
+    <div class="page-art">{{HERO_ART}}</div>
   </div>
 </section>
 {{PERKS}}
@@ -1574,6 +1800,92 @@ def build_static():
 # ---------------------------------------------------------------------------
 # ASSET / SEO DOSYALARI
 # ---------------------------------------------------------------------------
+def build_stores():
+    """Magazalar sayfasi: acik adres, telefon, calisma saati ve gomulu harita."""
+    cb = [("Mağazalar", None)]
+    faqs = [
+        ("Odabaşı'nın İzmir'de kaç mağazası var?",
+         "İzmir Konak'ta iki marka mağazamız bulunuyor: LG ürün gamının sergilendiği LG Shop Çankaya ve "
+         "ev tipi derin dondurucu ile ticari soğutma ürünlerinin bulunduğu Uğur Shop Eşrefpaşa."),
+        ("Mağazaya gitmeden fiyat öğrenebilir miyim?",
+         "Evet. Telefonla ya da site üzerindeki teklif formuyla model ve adet bilgisini iletin; güncel fiyatı, "
+         "teslimat tarihini ve taksit seçeneklerini aynı gün içinde bildirelim."),
+        ("Ürünü mağazadan kendim alabilir miyim?",
+         "Alabilirsiniz, ancak gerek yok. İzmir, Aydın ve Manisa'da teslimat ve standart montaj ücretsizdir; "
+         "ürünü kata çıkarma dahil yerine kurup devreye alıyoruz."),
+        ("Mağazalarınız hafta sonu açık mı?",
+         "Mağazalarımız pazartesiden cumartesiye 09:00 - 19:00 arasında hizmet veriyor. Pazar günleri kapalıyız; "
+         "teklif formuna bıraktığınız talebe pazartesi sabahı dönüş yapıyoruz."),
+    ]
+    body = """
+%s
+<section class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">%s Mağazalar</p>
+    <h1>Mağazalarımız ve konumları</h1>
+    <p class="lead-p">İzmir Konak'ta iki marka mağazamız var. Aşağıdaki haritalardan yol tarifi alabilir,
+    doğrudan mağazayı arayabilirsiniz. Ürünlerimizin bir bölümü Hepsiburada ve n11 mağazalarımızda da satışta.</p>
+  </div>
+</section>
+{{PERKS}}
+<section class="sec">
+  <div class="wrap">
+    %s
+    %s
+  </div>
+</section>
+
+<section class="sec sec-soft">
+  <div class="wrap">
+    <div class="sec-head sec-head-c">
+      <h2>Hizmet verdiğimiz bölgeler</h2>
+      <p>Mağazalarımız İzmir'de; teslimat ve montaj hizmetimiz İzmir, Aydın ve Manisa'yı kapsıyor.</p>
+    </div>
+  </div>
+  %s
+</section>
+
+<section class="sec sec-shops">
+  <div class="wrap shops-in">
+    <div>
+      <p class="eyebrow">%s Online Mağazalarımız</p>
+      <h2>Hepsiburada ve n11</h2>
+      <p>Pazaryeri mağazalarımızdan da sipariş verebilirsiniz. Stok ve teslimat süresi konusunda emin
+      olamadığınızda mağazalarımızı aramanız daha hızlı sonuç verir.</p>
+    </div>
+    <div class="shops-btns">%s</div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">%s</div>
+</section>
+%s
+""" % (
+        crumbs(0, cb), icon("store", "ico sm"),
+        answer_box("Odabaşı Dayanıklı Tüketim'in İzmir Konak'ta iki mağazası bulunmaktadır: "
+                   "LG Shop Çankaya ve Uğur Shop Eşrefpaşa. Her iki mağaza da pazartesi - cumartesi "
+                   "09:00 - 19:00 saatleri arasında açıktır. Teslimat ve montaj hizmeti İzmir, Aydın ve "
+                   "Manisa'yı kapsar.",
+                   "Odabaşı mağazaları nerede?"),
+        stores_section(0, "h2"),
+        service_map(0),
+        icon("cart", "ico sm"), mp_links("mp-big"),
+        faq_html(faqs),
+        cta_band(0, "Gelmeden önce arayın",
+                 "Aradığınız modelin mağazada sergilenip sergilenmediğini telefonla öğrenebilir, "
+                 "size uygun saatte randevu alabilirsiniz."),
+    )
+    render("magazalar.html",
+           "Mağazalarımız | LG Shop Çankaya ve Uğur Shop Eşrefpaşa | Odabaşı",
+           "Odabaşı Dayanıklı Tüketim mağazaları: LG Shop Çankaya ve Uğur Shop Eşrefpaşa. "
+           "Adres, telefon, çalışma saatleri ve harita üzerinden yol tarifi.",
+           body,
+           ld=[crumb_ld(cb), faq_ld(faqs)] + branch_ld(),
+           active="magazalar", depth=0)
+    register("magazalar.html", "0.9", "monthly")
+
+
 def build_assets():
     os.makedirs(os.path.join(OUT, "assets"), exist_ok=True)
     with open(os.path.join(OUT, "assets", "style.css"), "w", encoding="utf-8") as f:
@@ -1585,6 +1897,16 @@ def build_assets():
         src = os.path.join(here, "assets_src", fn)
         if os.path.exists(src):
             shutil.copyfile(src, os.path.join(OUT, "assets", fn))
+    # fotograflar (stok gorseller - Unsplash License)
+    fdir = os.path.join(OUT, "assets", "foto")
+    if os.path.isdir(PHOTO_DIR):
+        os.makedirs(fdir, exist_ok=True)
+        n = 0
+        for fn in sorted(os.listdir(PHOTO_DIR)):
+            if fn.endswith(".webp"):
+                shutil.copyfile(os.path.join(PHOTO_DIR, fn), os.path.join(fdir, fn))
+                n += 1
+        print("Fotograf: %d dosya" % n)
     mdir = os.path.join(OUT, "assets", "markalar")
     os.makedirs(mdir, exist_ok=True)
     found, missing = 0, []
@@ -1870,10 +2192,14 @@ img,svg{max-width:100%}
 
 /* ---- topbar / header ---- */
 .topbar{background:var(--dark); color:#D5D9E0; font-size:.8rem}
-.topbar-in{display:flex; gap:22px; padding:9px 20px; align-items:center}
-.topbar-in span{display:flex; align-items:center; gap:6px; white-space:nowrap}
+.topbar-in{display:flex; gap:28px; padding:10px 20px; align-items:center}
 .topbar-in .ico{color:var(--brand)}
-.topbar-r{margin-left:auto; color:#9AA3AF}
+.tb-item{display:flex; align-items:center; gap:9px; white-space:nowrap}
+.tb-item>.ico{width:22px;height:22px}
+.tb-item b{display:block; color:#fff; font-size:.76rem; font-weight:700; line-height:1.35}
+.tb-item span{display:block; line-height:1.35}
+.tb-item a{color:#D5D9E0}
+.tb-item a:hover{color:var(--brand); text-decoration:none}
 .hd{position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid var(--line)}
 .hd-in{display:flex; align-items:center; gap:22px; padding-block:13px}
 .logo{display:block; flex:none; line-height:0}
@@ -1929,6 +2255,8 @@ img,svg{max-width:100%}
 .hero-points .ico{color:var(--brand)}
 .hero-art{position:relative}
 .hero-art .art{width:100%;height:auto;display:block}
+.page-art{max-width:660px;margin:26px auto 0}
+.page-art .art{width:100%;height:auto;display:block}
 
 .page-hero{background:linear-gradient(180deg,#FFFFFF,#F7F9FC);border-bottom:1px solid var(--line);padding-block:52px 46px;position:relative}
 .page-hero::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:linear-gradient(90deg,var(--brand),rgba(230,0,52,0) 62%)}
@@ -2223,6 +2551,93 @@ tbody tr:last-child td{border-bottom:0}
 .ft-col a:hover{color:var(--brand)}
 .ft-bot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:44px;padding-block:20px;border-top:1px solid rgba(255,255,255,.09);font-size:.8rem;color:#6B7280}
 
+/* ---- pazaryeri magazalari ---- */
+.mp-top,.mp-nav,.mp-ft,.mp-big{display:inline-flex;align-items:center;font-weight:700;white-space:nowrap}
+.mp-top{font-size:.78rem;padding:3px 9px;border-radius:6px;color:#fff;line-height:1.5}
+.mp-top.mp-hepsiburada{background:#FF6000}
+.mp-top.mp-n11{background:#F2385A}
+.mp-top:hover{text-decoration:none;color:#fff;filter:brightness(1.08)}
+.tb-shops{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tb-shops-l{color:#9AA3AF;font-size:.78rem}
+.nav-mp{display:none}
+.mp-ft{font-size:.82rem;padding:6px 12px;border-radius:8px;color:#fff;margin-right:8px;margin-top:8px}
+.mp-ft.mp-hepsiburada{background:#FF6000}
+.mp-ft.mp-n11{background:#F2385A}
+.mp-ft:hover{text-decoration:none;color:#fff;filter:brightness(1.1)}
+.ft-shops{margin-top:22px}
+.ft-shops b{display:block;color:#fff;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
+.mp-big{font-size:1rem;padding:14px 26px;border-radius:12px;color:#fff;box-shadow:var(--shadow)}
+.mp-big.mp-hepsiburada{background:#FF6000}
+.mp-big.mp-n11{background:#F2385A}
+.mp-big:hover{text-decoration:none;color:#fff;transform:translateY(-2px);filter:brightness(1.06)}
+.sec-shops{background:var(--dark);color:#fff}
+.sec-shops h2{color:#fff}
+.sec-shops p{color:#AEB5C0}
+.sec-shops .eyebrow{color:var(--brand)}
+.shops-in{display:grid;grid-template-columns:1.4fr .9fr;gap:32px;align-items:center}
+.shops-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+
+/* ---- yuzen butonlar ---- */
+.fabs{position:fixed;right:18px;bottom:18px;z-index:80;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.fab{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:999px;color:#fff;font-weight:600;font-size:.9rem;box-shadow:0 6px 22px rgba(16,18,22,.28)}
+.fab:hover{text-decoration:none;color:#fff;filter:brightness(1.08)}
+.fab .ico{width:18px;height:18px}
+.fab-wa{background:var(--ok)}
+.fab-hepsiburada{background:#FF6000;padding:10px 16px;font-size:.84rem}
+.fab-n11{background:#F2385A;padding:10px 16px;font-size:.84rem}
+
+/* ---- fotografli kategori kartlari ---- */
+.sec-head-c{max-width:66ch;margin-inline:auto;text-align:center}
+.sec-head-c h2{padding-top:20px}
+.sec-head-c h2::before{left:50%;transform:translateX(-50%)}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.pcard{position:relative;display:block;border-radius:var(--r);overflow:hidden;background:var(--ink);min-height:250px;box-shadow:var(--shadow)}
+.pcard:hover{text-decoration:none;box-shadow:var(--shadow-lg)}
+.pcard-img{position:absolute;inset:0;display:block}
+.pcard-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.pcard:hover .pcard-img img{transform:scale(1.05)}
+.pcard::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,12,15,.62) 0%,rgba(11,12,15,.16) 42%,rgba(11,12,15,.16) 58%,rgba(11,12,15,.78) 100%)}
+.pcard-noimg{background:linear-gradient(160deg,var(--ink-2),var(--dark))}
+.pcard-in{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:space-between;height:100%;min-height:250px;padding:22px}
+.pcard-t{display:block}
+.pcard-in strong{display:block;color:#fff;font-family:Manrope,Inter,sans-serif;font-size:1.22rem;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.pcard-sub{display:block;color:rgba(255,255,255,.72);font-size:.8rem;margin-top:4px}
+.pcard-go{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;background:rgba(255,255,255,.94);color:var(--ink);font-size:.82rem;font-weight:700;padding:8px 14px;border-radius:8px;transition:background .2s,color .2s}
+.pcard:hover .pcard-go{background:var(--brand);color:#fff}
+
+/* ---- hero fotografi ---- */
+.hero-photo{position:relative;z-index:2;border-radius:18px;overflow:hidden;box-shadow:var(--shadow-lg);aspect-ratio:16/10;background:var(--soft)}
+.hero-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-line{position:absolute;border-radius:3px;background:var(--brand);box-shadow:0 0 14px rgba(230,0,52,.7);z-index:1}
+.hero-line-1{height:3px;width:130px;top:-14px;right:38px}
+.hero-line-2{width:3px;height:92px;top:26px;right:-14px}
+.hero-line-3{height:3px;width:190px;bottom:-14px;left:30px}
+.hero-badge{position:absolute;z-index:3;left:-18px;bottom:22px;display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-lg);max-width:280px}
+.hero-badge .ico{color:var(--brand)}
+.hero-badge span{font-size:.76rem;color:var(--muted);line-height:1.45}
+.hero-badge b{display:block;color:var(--ink);font-size:.88rem}
+
+/* ---- magaza kartlari ---- */
+.stores{display:flex;flex-direction:column;gap:26px}
+.store{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.store-head{display:flex;align-items:center;gap:16px;padding:22px 24px;border-bottom:1px solid var(--line-2);border-top:3px solid var(--brand)}
+.store-head h2,.store-head h3{margin:0;font-size:1.2rem}
+.store-head p{margin:4px 0 0;font-size:.86rem;color:var(--muted)}
+.store-body{display:grid;grid-template-columns:1fr 1.15fr;gap:0}
+.store-info{padding:24px;display:flex;flex-direction:column;gap:18px}
+.store-row{display:flex;flex-direction:column;gap:4px}
+.store-lbl{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.store-lbl .ico{color:var(--brand)}
+.store-addr{font-style:normal;display:flex;flex-direction:column;font-size:.95rem;color:var(--ink-2)}
+.store-row a{color:var(--ink-2);font-size:.95rem;font-weight:600}
+.store-row a:hover{color:var(--brand)}
+.store-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto;padding-top:4px}
+.store-actions .btn{font-size:.86rem}
+.store-map{position:relative;min-height:330px;background:var(--soft);border-left:1px solid var(--line-2)}
+.store-map iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.store-map-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted-2);text-align:center;padding:24px}
+.store-map-empty p{font-size:.85rem;margin:0;max-width:30ch}
+
 /* ---- whatsapp float ---- */
 .wa{position:fixed;right:18px;bottom:18px;z-index:80;display:inline-flex;align-items:center;gap:8px;background:var(--ok);color:#fff;padding:12px 18px;border-radius:999px;font-weight:600;font-size:.9rem;box-shadow:0 6px 22px rgba(31,122,77,.35)}
 .wa:hover{text-decoration:none;color:#fff;background:#186339}
@@ -2250,7 +2665,18 @@ tbody tr:last-child td{border-bottom:0}
   .mega{position:static;width:auto!important;box-shadow:none;border:0;border-radius:0;padding:0 0 8px 12px;grid-template-columns:1fr!important}
   .nav-link{justify-content:space-between;width:100%;padding:12px}
   .topbar-in{font-size:.74rem;gap:14px;justify-content:center}
-  .topbar-in .topbar-mid,.topbar-in .topbar-r{display:none}
+  .topbar-in .tb-mid,.topbar-in .tb-shops{display:none}
+  .tb-item>.ico{width:18px;height:18px}
+  .nav-mp{display:flex;gap:8px;margin-top:16px;padding:16px 12px 0;border-top:1px solid var(--line)}
+  .nav-mp .mp-nav{font-size:.82rem;padding:8px 14px;border-radius:8px;color:#fff}
+  .nav-mp .mp-hepsiburada{background:#FF6000}
+  .nav-mp .mp-n11{background:#F2385A}
+  .store-body{grid-template-columns:1fr}
+  .store-map{min-height:280px;border-left:0;border-top:1px solid var(--line-2)}
+  .pgrid{grid-template-columns:repeat(2,1fr)}
+  .shops-in{grid-template-columns:1fr;gap:22px}
+  .shops-btns{justify-content:flex-start}
+  .hero-badge{left:12px}
   .form-split{grid-template-columns:1fr;gap:32px}
   .branches{grid-template-columns:1fr}
   .areas{grid-template-columns:repeat(2,1fr)}
@@ -2277,6 +2703,17 @@ tbody tr:last-child td{border-bottom:0}
   .areas{grid-template-columns:1fr}
   .wa span{display:none}
   .wa{padding:14px;border-radius:50%}
+  .pgrid{grid-template-columns:1fr}
+  .pcard,.pcard-in{min-height:210px}
+  .fabs{right:14px;bottom:14px;gap:8px}
+  .fab .fab-t{display:none}
+  .fab{padding:13px;border-radius:50%}
+  .fab-hepsiburada,.fab-n11{padding:11px}
+  .fab-hepsiburada .ico,.fab-n11 .ico{width:16px;height:16px}
+  .hero-badge{position:static;max-width:none;margin-top:16px}
+  .hero-line-2{display:none}
+  .store-actions .btn{width:100%;justify-content:center}
+  .mp-big{width:100%;justify-content:center}
   .badge{display:block;margin:12px 0 0;top:0;width:fit-content}
   .logo img{height:32px}
 }
@@ -2385,6 +2822,7 @@ def main():
     build_brands()
     build_locations()
     build_blog()
+    build_stores()
     build_static()
     build_assets()
     build_seo_files()
